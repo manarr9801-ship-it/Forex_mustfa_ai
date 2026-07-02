@@ -9,7 +9,9 @@ import pandas as pd
 import time
 """
 
-importimportimportimportimportimportimportimport requests
+import requests
+import pandas as pd
+import time
 import pandas as pd
 import time
 
