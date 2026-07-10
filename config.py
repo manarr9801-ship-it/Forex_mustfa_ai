@@ -3,22 +3,18 @@
 # CONFIGURATION
 # =====================================
 
-SYMBOLS = [
-    "EUR/USD"
-]
+SYMBOL = "EUR/USD"
 
 INTERVAL = "1h"
 OUTPUT_SIZE = 200
 
 
 # Twelve Data
-API_KEY = "ضع_مفتاح_Twelve_Data_هنا"
-
+API_KEY = "8ddb1cdc9051436b8fc9bfd775b913fc"
 
 # Telegram
-BOT_TOKEN = "ضع_توكن_التليجرام_هنا"
-CHAT_ID = "ضع_ID_التليجرام_هنا"
-
+TOKEN = "8229091266:AAHzWGVuzi_F4KCiJ1naL7_knKPBr21E93k"
+CHAT_ID = " 729720320"
 
 # Risk Management
 RISK_PERCENT = 1
