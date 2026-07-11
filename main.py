@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from telegram_bot import send_telegram, build_signal_message
+
 from market_data import get_market_data
 import requests
 import pandas as pd
 import time
-import requests
-import pandas as pd
 from ai_engine import analyze_market
 # =====================================
 # TELEGRAM
@@ -160,4 +160,4 @@ EMA20: {last['EMA20']:.5f}
 EMA50: {last['EMA50']:.5f}
 MACD: {last['MACD']:.5f}
 """
-
+send_telegram(message)
