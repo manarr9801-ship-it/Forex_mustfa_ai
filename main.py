@@ -126,67 +126,33 @@ def send_telegram(message):
     return response.json()
 
 
-signal = generate_signal(df)
+ai_result = analyze_market(df)
+
+signal = ai_result["signal"]
+confidence = ai_result["confidence"]
+reasons = ai_result["reasons"]
+price = ai_result["price"]
 
 last = df.iloc[-1]
 
 message = f"""
-📈 *Forex Signal*
+📊 *Forex AI Analyzer V2*
 
 💱 الزوج: {SYMBOL}
 
 📢 الإشارة: {signal}
 
-💰 السعر: {last['close']:.5f}
+🎯 الثقة: {confidence}%
 
-📊 RSI: {last['RSI']:.2f}
-📈 EMA20: {last['EMA20']:.5f}
-📉 EMA50: {last['EMA50']:.5f}
+💰 السعر: {price:.5f}
 
-⚙️ MACD: {last['MACD']:.5f}
-⚙️ Signal: {last['MACD_SIGNAL']:.5f}
+🧠 الأسباب:
+{chr(10).join(reasons)}
+
+📌 المؤشرات:
+RSI: {last['RSI']:.2f}
+EMA20: {last['EMA20']:.5f}
+EMA50: {last['EMA50']:.5f}
+MACD: {last['MACD']:.5f}
 """
 
-result = send_telegram(message)
-
-print(result)
-
-import time
-
-print("🚀 بدأ البوت...")
-
-while True:
-    try:
-        df = get_market_data()
-
-        if df is not None:
-            df = calculate_indicators(df)
-            signal = generate_signal(df)
-
-            last = df.iloc[-1]
-
-            message = f"""
-📈 *Forex Signal*
-
-💱 الزوج: {SYMBOL}
-
-📢 الإشارة: {signal}
-
-💰 السعر: {last['close']:.5f}
-
-📊 RSI: {last['RSI']:.2f}
-📈 EMA20: {last['EMA20']:.5f}
-📉 EMA50: {last['EMA50']:.5f}
-
-⚙️ MACD: {last['MACD']:.5f}
-⚙️ Signal: {last['MACD_SIGNAL']:.5f}
-"""
-
-            print(send_telegram(message))
-
-        print("⏳ انتظار ساعة...")
-        time.sleep(CHECK_INTERVAL)
-
-    except Exception as e:
-        print("ERROR:", e)
-        time.sleep(60)
