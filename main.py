@@ -32,8 +32,11 @@ RISK_REWARD = 2
 
 df = get_market_data()
 
-if df is not None:
-    print(df.tail())
+if df is None:
+    print("No market data available. Waiting for next cycle...")
+    exit()
+
+print(df.tail())
 
 def calculate_indicators(df):
     # EMA 20
