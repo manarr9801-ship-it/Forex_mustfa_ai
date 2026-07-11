@@ -4,7 +4,9 @@ from market_data import get_market_data
 import requests
 import pandas as pd
 import time
-
+import requests
+import pandas as pd
+from ai_engine import analyze_market
 # =====================================
 # TELEGRAM
 # =====================================
