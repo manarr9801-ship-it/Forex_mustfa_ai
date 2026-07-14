@@ -59,11 +59,11 @@ def analyze_market(df):
     else:
         signal = "WAIT"
 
-
-    return {
-        "signal": signal,
-        "confidence": confidence,
-        "reasons": reasons,
-        "price": float(last["close"]),
-        "atr": atr_value
-    }
+return {
+    "signal": signal,
+    "confidence": confidence,
+    "reasons": reasons,
+    "price": float(last["close"]),
+    "atr": float(last["ATR"])
+}
+ 
