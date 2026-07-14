@@ -1,10 +1,10 @@
 # =====================================
-# Forex_mustfa_ai V3
+# Forex_mustfa_ai V4
 # RISK MANAGER
 # =====================================
 
 
-def calculate_trade(price, signal, atr):
+def calculate_trade(price, signal, atr, trade_type="NORMAL"):
 
 
     # لا توجد صفقة
@@ -14,19 +14,12 @@ def calculate_trade(price, signal, atr):
         return {
 
             "entry": "-",
-
             "stop_loss": "-",
-
             "tp1": "-",
-
             "tp2": "-",
-
             "tp3": "-",
-
             "expected_points": "-",
-
             "risk_reward": "-",
-
             "atr": round(atr,5)
 
         }
@@ -34,16 +27,40 @@ def calculate_trade(price, signal, atr):
 
 
     # =========================
-    # ATR SETTINGS
+    # ATR MANAGEMENT V4
     # =========================
 
-    sl_distance = atr * 1.5
 
-    tp1_distance = atr * 1.5
+    if trade_type == "STRONG":
 
-    tp2_distance = atr * 2.5
+        sl_multiplier = 1.8
 
-    tp3_distance = atr * 3.5
+        tp1_multiplier = 2
+
+        tp2_multiplier = 3
+
+        tp3_multiplier = 5
+
+
+    else:
+
+        sl_multiplier = 1.5
+
+        tp1_multiplier = 1.5
+
+        tp2_multiplier = 2.5
+
+        tp3_multiplier = 3.5
+
+
+
+    sl_distance = atr * sl_multiplier
+
+    tp1_distance = atr * tp1_multiplier
+
+    tp2_distance = atr * tp2_multiplier
+
+    tp3_distance = atr * tp3_multiplier
 
 
 
@@ -85,8 +102,9 @@ def calculate_trade(price, signal, atr):
 
 
 
+
     # =========================
-    # CALCULATIONS
+    # PERFORMANCE
     # =========================
 
 
@@ -125,6 +143,8 @@ def calculate_trade(price, signal, atr):
 
         "risk_reward": risk_reward,
 
-        "atr": round(atr,5)
+        "atr": round(atr,5),
+
+        "trade_type": trade_type
 
     }
