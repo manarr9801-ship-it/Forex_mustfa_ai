@@ -1,169 +1,165 @@
-# -*- coding: utf-8 -*-
+# =====================================
+# Forex_mustfa_ai V3
+# MAIN ENGINE
+# =====================================
 
-from telegram_bot import send_telegram, build_signal_message
+import time
 
 from market_data import get_market_data
-import requests
-import pandas as pd
-import time
+
 from ai_engine import analyze_market
+
 from risk_manager import calculate_trade
-# =====================================
-# TELEGRAM
-# =====================================
-TOKEN = "8229091266:AAHzWGVuzi_F4KCiJ1naL7_knKPBr21E93k"
-CHAT_ID = " 729720320"
 
-# =====================================
-# TWELVE DATA
-# =====================================
-API_KEY = "8ddb1cdc9051436b8fc9bfd775b913fc"
+from telegram_bot import (
+    send_telegram,
+    build_signal_message
+)
 
-# =====================================
-# SETTINGS
-# =====================================
-SYMBOL = "EUR/USD"
-INTERVAL = "1h"
-OUTPUTSIZE = 200
+from config import (
+    SYMBOL,
+    CHECK_INTERVAL
+)
 
-AUTO_TRADE = False
-CHECK_INTERVAL = 3600
-RISK_REWARD = 2
-
-
-
-
-df = get_market_data()
-
-if df is None:
-    print("No market data available. Waiting for next cycle...")
-    exit()
-
-print(df.tail())
 
 def calculate_indicators(df):
-    # EMA 20
-    df["EMA20"] = df["close"].ewm(span=20, adjust=False).mean()
 
-    # EMA 50
-    df["EMA50"] = df["close"].ewm(span=50, adjust=False).mean()
+    # EMA
 
-    # RSI 14
+    df["EMA20"] = (
+        df["close"]
+        .ewm(span=20, adjust=False)
+        .mean()
+    )
+
+    df["EMA50"] = (
+        df["close"]
+        .ewm(span=50, adjust=False)
+        .mean()
+    )
+
+
+    # RSI
+
     delta = df["close"].diff()
 
     gain = delta.where(delta > 0, 0)
+
     loss = -delta.where(delta < 0, 0)
 
+
     avg_gain = gain.rolling(14).mean()
+
     avg_loss = loss.rolling(14).mean()
 
+
     rs = avg_gain / avg_loss
+
     df["RSI"] = 100 - (100 / (1 + rs))
 
+
     # MACD
-    ema12 = df["close"].ewm(span=12, adjust=False).mean()
-    ema26 = df["close"].ewm(span=26, adjust=False).mean()
+
+    ema12 = (
+        df["close"]
+        .ewm(span=12, adjust=False)
+        .mean()
+    )
+
+    ema26 = (
+        df["close"]
+        .ewm(span=26, adjust=False)
+        .mean()
+    )
+
 
     df["MACD"] = ema12 - ema26
-    df["MACD_SIGNAL"] = df["MACD"].ewm(span=9, adjust=False).mean()
+
+    df["MACD_SIGNAL"] = (
+        df["MACD"]
+        .ewm(span=9, adjust=False)
+        .mean()
+    )
+
+
+    # ATR
+
+    df["TR"] = (
+        df["high"] -
+        df["low"]
+    )
+
+
+    df["ATR"] = (
+        df["TR"]
+        .rolling(14)
+        .mean()
+    )
+
 
     return df
 
 
-df = calculate_indicators(df)
 
-print(df[[
-    "close",
-    "EMA20",
-    "EMA50",
-    "RSI",
-    "MACD",
-    "MACD_SIGNAL"
-]].tail())
+def run_bot():
 
-def generate_signal(df):
-    last = df.iloc[-1]
-
-    if (
-        last["EMA20"] > last["EMA50"] and
-        last["MACD"] > last["MACD_SIGNAL"] and
-        last["RSI"] > 50
-    ):
-        signal = "BUY"
-
-    elif (
-        last["EMA20"] < last["EMA50"] and
-        last["MACD"] < last["MACD_SIGNAL"] and
-        last["RSI"] < 50
-    ):
-        signal = "SELL"
-
-    else:
-        signal = "WAIT"
-
-    print("=" * 40)
-    print("SIGNAL :", signal)
-    print("PRICE  :", last["close"])
-    print("EMA20  :", round(last["EMA20"], 5))
-    print("EMA50  :", round(last["EMA50"], 5))
-    print("RSI    :", round(last["RSI"], 2))
-    print("MACD   :", round(last["MACD"], 5))
-    print("SIGNAL :", round(last["MACD_SIGNAL"], 5))
-    print("=" * 40)
-
-    return signal
+    print("Forex_mustfa_ai V3 Started")
 
 
-generate_signal(df)
+    while True:
 
-BOT_TOKEN = "8229091266:AAHzWGVuzi_F4KCiJ1naL7_knKPBr21E93k"
-CHAT_ID = "729720320"
+        try:
 
-def send_telegram(message):
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-
-    data = {
-        "chat_id": CHAT_ID,
-        "text": message,
-        "parse_mode": "Markdown"
-    }
-
-    response = requests.post(url, data=data)
-    return response.json()
-    
-ai_result = analyze_market(df)
-
-last = df.iloc[-1]
-
-trade_data = calculate_trade(
-    ai_result["price"],
-    ai_result["signal"],
-    0.001
-)
+            df = get_market_data()
 
 
-signal = ai_result["signal"]
-confidence = ai_result["confidence"]
-reasons = ai_result["reasons"]
-price = ai_result["price"]
+            if df is None:
+                print("No data")
+                time.sleep(CHECK_INTERVAL)
+                continue
 
-atr = ai_result["atr"]
 
-message = f"""
-📊 Forex AI Analyzer V2
+            df = calculate_indicators(df)
 
-الزوج: {SYMBOL}
 
-الإشارة: {signal}
+            ai_result = analyze_market(df)
 
-الثقة: {confidence}%
 
-السعر: {price}
+            last = df.iloc[-1]
 
-الأسباب:
-{chr(10).join(reasons)}
-"""
 
-send_telegram(message)
+            trade_data = calculate_trade(
+                ai_result["price"],
+                ai_result["signal"],
+                float(last["ATR"])
+            )
 
-print("Telegram message sent")
+
+            message = build_signal_message(
+                SYMBOL,
+                ai_result,
+                trade_data
+            )
+
+
+            send_telegram(message)
+
+
+            print(message)
+
+
+        except Exception as e:
+
+            print(
+                "BOT ERROR:",
+                e
+            )
+
+
+        time.sleep(CHECK_INTERVAL)
+
+
+
+if __name__ == "__main__":
+
+    run_bot()
