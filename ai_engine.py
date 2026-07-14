@@ -1,5 +1,5 @@
 # =====================================
-# Forex_mustfa_ai V3
+# Forex_mustfa_ai V4
 # AI ENGINE
 # =====================================
 
@@ -17,16 +17,19 @@ def analyze_market(df):
 
 
     # =========================
-    # TREND ANALYSIS
+    # TREND
     # =========================
 
     if last["EMA20"] > last["EMA50"]:
+
         buy_score += 30
         reasons.append("EMA trend bullish")
 
     else:
+
         sell_score += 30
         reasons.append("EMA trend bearish")
+
 
 
     # =========================
@@ -44,51 +47,88 @@ def analyze_market(df):
         reasons.append("MACD bearish momentum")
 
 
+
     # =========================
-    # RSI FILTER
+    # RSI INTELLIGENCE
     # =========================
 
     rsi = last["RSI"]
 
 
-    if 55 < rsi < 70:
+    if 55 <= rsi < 70:
 
-        buy_score += 20
-        reasons.append("RSI supports buyers")
+        buy_score += 15
+        reasons.append("RSI buyer strength")
 
 
-    elif 30 < rsi < 45:
+    elif 30 < rsi <= 45:
 
-        sell_score += 20
-        reasons.append("RSI supports sellers")
+        sell_score += 15
+        reasons.append("RSI seller strength")
 
 
     elif rsi >= 70:
 
-        reasons.append("RSI overbought - caution")
+        sell_score -= 10
+        reasons.append("RSI overbought")
 
 
     elif rsi <= 30:
 
-        reasons.append("RSI oversold - caution")
+        buy_score -= 10
+        reasons.append("RSI oversold")
+
 
 
     # =========================
     # ATR MARKET POWER
     # =========================
 
-    atr = last["ATR"]
+    atr = float(last["ATR"])
+
 
     if atr > 0:
 
         buy_score += 10
         sell_score += 10
 
-        reasons.append("ATR confirms volatility")
+        reasons.append(
+            "ATR confirms volatility"
+        )
+
 
 
     # =========================
-    # CONFIDENCE
+    # MARKET PRESSURE
+    # =========================
+
+    candle_power = (
+        last["close"] -
+        last["open"]
+    )
+
+
+    if candle_power > 0:
+
+        buy_score += 10
+
+        reasons.append(
+            "Buyer pressure detected"
+        )
+
+
+    else:
+
+        sell_score += 10
+
+        reasons.append(
+            "Seller pressure detected"
+        )
+
+
+
+    # =========================
+    # FINAL SCORE
     # =========================
 
     confidence = max(
@@ -96,10 +136,6 @@ def analyze_market(df):
         sell_score
     )
 
-
-    # =========================
-    # FINAL DECISION
-    # =========================
 
     if buy_score >= CONFIDENCE_LIMIT:
 
@@ -116,16 +152,39 @@ def analyze_market(df):
         signal = "WAIT"
 
 
+
+    # =========================
+    # TRADE TYPE
+    # =========================
+
+    if confidence >= 85:
+
+        trade_type = "STRONG"
+
+
+    elif confidence >= 75:
+
+        trade_type = "NORMAL"
+
+
+    else:
+
+        trade_type = "WAIT"
+
+
+
     return {
 
         "signal": signal,
 
         "confidence": confidence,
 
+        "trade_type": trade_type,
+
         "reasons": reasons,
 
         "price": float(last["close"]),
 
-        "atr": float(last["ATR"])
+        "atr": atr
 
     }
