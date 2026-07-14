@@ -40,6 +40,10 @@ def analyze_market(df):
         reasons.append("RSI supports sellers")
 
 
+    # ATR
+    atr_value = float(last["ATR"]) if "ATR" in df.columns else 0
+
+
     confidence = max(
         buy_score,
         sell_score
@@ -60,5 +64,6 @@ def analyze_market(df):
         "signal": signal,
         "confidence": confidence,
         "reasons": reasons,
-        "price": float(last["close"])
+        "price": float(last["close"]),
+        "atr": atr_value
     }
