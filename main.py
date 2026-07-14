@@ -148,26 +148,22 @@ reasons = ai_result["reasons"]
 price = ai_result["price"]
 
 atr = ai_result["atr"]
+
 message = f"""
-📊 *Forex AI Analyzer V2*
+📊 Forex AI Analyzer V2
 
-💱 الزوج: {SYMBOL}
+الزوج: {SYMBOL}
 
-📢 الإشارة: {signal}
+الإشارة: {signal}
 
-🎯 الثقة: {confidence}%
+الثقة: {confidence}%
 
-💰 السعر: {price:.5f}
+السعر: {price}
 
-📈 ATR: {atr:.5f}
-
-🧠 الأسباب:
+الأسباب:
 {chr(10).join(reasons)}
-
-📌 المؤشرات:
-
-RSI: {last['RSI']:.2f}
-EMA20: {last['EMA20']:.5f}
-EMA50: {last['EMA50']:.5f}
-MACD: {last['MACD']:.5f}
 """
+
+send_telegram(message)
+
+print("Telegram message sent")
