@@ -145,7 +145,7 @@ trade_data = calculate_trade(
 signal = ai_result["signal"]
 confidence = ai_result["confidence"]
 reasons = ai_result["reasons"]
-price = ai_result["price"
+price = ai_result["price"]
 
 
 
