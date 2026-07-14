@@ -7,6 +7,7 @@ import requests
 import pandas as pd
 import time
 from ai_engine import analyze_market
+from risk_manager import calculate_trade
 # =====================================
 # TELEGRAM
 # =====================================
@@ -129,16 +130,24 @@ def send_telegram(message):
 
     response = requests.post(url, data=data)
     return response.json()
-
-
+    
 ai_result = analyze_market(df)
+
+last = df.iloc[-1]
+
+trade_data = calculate_trade(
+    ai_result["price"],
+    ai_result["signal"],
+    last["ATR"]
+)
+
 
 signal = ai_result["signal"]
 confidence = ai_result["confidence"]
 reasons = ai_result["reasons"]
-price = ai_result["price"]
+price = ai_result["price"
 
-last = df.iloc[-1]
+
 
 message = f"""
 📊 *Forex AI Analyzer V2*
