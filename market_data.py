@@ -4,6 +4,7 @@
 # =====================================
 
 import requests
+import pandas as pd
 
 from config import (
     SYMBOL,
@@ -23,7 +24,6 @@ def get_market_data():
         f"&apikey={API_KEY}"
     )
 
-
     try:
 
         response = requests.get(
@@ -33,13 +33,9 @@ def get_market_data():
 
         data = response.json()
 
-
         if "values" not in data:
             print(data)
             return None
-
-
-        import pandas as pd
 
 
         df = pd.DataFrame(
@@ -57,6 +53,21 @@ def get_market_data():
             "close"
         ]:
             df[col] = df[col].astype(float)
+
+
+        # =========================
+        # ATR Calculation
+        # =========================
+
+        df["TR"] = (
+            df["high"] - df["low"]
+        )
+
+        df["ATR"] = (
+            df["TR"]
+            .rolling(window=14)
+            .mean()
+        )
 
 
         return df
