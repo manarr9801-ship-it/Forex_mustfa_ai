@@ -1,5 +1,5 @@
 # =====================================
-# Forex_mustfa_ai V2
+# Forex_mustfa_ai V3
 # AI ENGINE
 # =====================================
 
@@ -16,38 +16,80 @@ def analyze_market(df):
     reasons = []
 
 
-    # EMA TREND
+    # =========================
+    # TREND ANALYSIS
+    # =========================
 
     if last["EMA20"] > last["EMA50"]:
-        buy_score += 25
+        buy_score += 30
         reasons.append("EMA trend bullish")
+
     else:
-        sell_score += 25
+        sell_score += 30
         reasons.append("EMA trend bearish")
 
 
-    # MACD
+    # =========================
+    # MACD MOMENTUM
+    # =========================
 
     if last["MACD"] > last["MACD_SIGNAL"]:
+
         buy_score += 25
-        reasons.append("MACD positive")
+        reasons.append("MACD bullish momentum")
+
     else:
+
         sell_score += 25
-        reasons.append("MACD negative")
+        reasons.append("MACD bearish momentum")
 
 
-    # RSI
+    # =========================
+    # RSI FILTER
+    # =========================
 
-    if last["RSI"] > 55:
+    rsi = last["RSI"]
+
+
+    if 55 < rsi < 70:
+
         buy_score += 20
         reasons.append("RSI supports buyers")
 
-    elif last["RSI"] < 45:
+
+    elif 30 < rsi < 45:
+
         sell_score += 20
         reasons.append("RSI supports sellers")
 
 
+    elif rsi >= 70:
+
+        reasons.append("RSI overbought - caution")
+
+
+    elif rsi <= 30:
+
+        reasons.append("RSI oversold - caution")
+
+
+    # =========================
+    # ATR MARKET POWER
+    # =========================
+
+    atr = last["ATR"]
+
+    if atr > 0:
+
+        buy_score += 10
+        sell_score += 10
+
+        reasons.append("ATR confirms volatility")
+
+
+    # =========================
     # CONFIDENCE
+    # =========================
 
     confidence = max(
         buy_score,
@@ -55,24 +97,35 @@ def analyze_market(df):
     )
 
 
-    # SIGNAL
+    # =========================
+    # FINAL DECISION
+    # =========================
 
     if buy_score >= CONFIDENCE_LIMIT:
+
         signal = "BUY"
 
+
     elif sell_score >= CONFIDENCE_LIMIT:
+
         signal = "SELL"
 
+
     else:
+
         signal = "WAIT"
 
 
-    # RETURN RESULT
-
     return {
+
         "signal": signal,
+
         "confidence": confidence,
+
         "reasons": reasons,
+
         "price": float(last["close"]),
+
         "atr": float(last["ATR"])
+
     }
