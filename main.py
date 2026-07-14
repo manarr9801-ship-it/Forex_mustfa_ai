@@ -138,7 +138,7 @@ last = df.iloc[-1]
 trade_data = calculate_trade(
     ai_result["price"],
     ai_result["signal"],
-    last["ATR"]
+    0.001
 )
 
 
