@@ -15,6 +15,9 @@ def analyze_market(df):
 
     reasons = []
 
+
+    # EMA TREND
+
     if last["EMA20"] > last["EMA50"]:
         buy_score += 25
         reasons.append("EMA trend bullish")
@@ -23,6 +26,8 @@ def analyze_market(df):
         reasons.append("EMA trend bearish")
 
 
+    # MACD
+
     if last["MACD"] > last["MACD_SIGNAL"]:
         buy_score += 25
         reasons.append("MACD positive")
@@ -30,6 +35,8 @@ def analyze_market(df):
         sell_score += 25
         reasons.append("MACD negative")
 
+
+    # RSI
 
     if last["RSI"] > 55:
         buy_score += 20
@@ -40,15 +47,15 @@ def analyze_market(df):
         reasons.append("RSI supports sellers")
 
 
-    # ATR
-    atr_value = float(last["ATR"]) if "ATR" in df.columns else 0
-
+    # CONFIDENCE
 
     confidence = max(
         buy_score,
         sell_score
     )
 
+
+    # SIGNAL
 
     if buy_score >= CONFIDENCE_LIMIT:
         signal = "BUY"
@@ -59,11 +66,13 @@ def analyze_market(df):
     else:
         signal = "WAIT"
 
-return {
-    "signal": signal,
-    "confidence": confidence,
-    "reasons": reasons,
-    "price": float(last["close"]),
-    "atr": float(last["ATR"])
-}
- 
+
+    # RETURN RESULT
+
+    return {
+        "signal": signal,
+        "confidence": confidence,
+        "reasons": reasons,
+        "price": float(last["close"]),
+        "atr": float(last["ATR"])
+    }
