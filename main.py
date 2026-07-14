@@ -1,14 +1,13 @@
 # =====================================
-# Forex_mustfa_ai V3
+# Forex_mustfa_ai V4
 # MAIN ENGINE
 # =====================================
 
 import time
+from datetime import datetime
 
 from market_data import get_market_data
-
 from ai_engine import analyze_market
-
 from risk_manager import calculate_trade
 
 from telegram_bot import (
@@ -20,6 +19,10 @@ from config import (
     SYMBOL,
     CHECK_INTERVAL
 )
+
+
+LAST_SIGNAL = None
+LAST_TIME = None
 
 
 def calculate_indicators(df):
@@ -44,14 +47,10 @@ def calculate_indicators(df):
     delta = df["close"].diff()
 
     gain = delta.where(delta > 0, 0)
-
     loss = -delta.where(delta < 0, 0)
 
-
     avg_gain = gain.rolling(14).mean()
-
     avg_loss = loss.rolling(14).mean()
-
 
     rs = avg_gain / avg_loss
 
@@ -89,7 +88,6 @@ def calculate_indicators(df):
         df["low"]
     )
 
-
     df["ATR"] = (
         df["TR"]
         .rolling(14)
@@ -101,9 +99,31 @@ def calculate_indicators(df):
 
 
 
+def strong_trade_filter(ai_result):
+
+    signal = ai_result["signal"]
+    confidence = ai_result["confidence"]
+
+
+    if signal == "WAIT":
+        return False
+
+
+    if confidence < 75:
+        return False
+
+
+    return True
+
+
+
 def run_bot():
 
-    print("Forex_mustfa_ai V3 Started")
+    global LAST_SIGNAL
+    global LAST_TIME
+
+
+    print("Forex_mustfa_ai V4 Started")
 
 
     while True:
@@ -114,15 +134,64 @@ def run_bot():
 
 
             if df is None:
-                print("No data")
-                time.sleep(CHECK_INTERVAL)
+
+                print("No market data")
+
+                time.sleep(
+                    CHECK_INTERVAL
+                )
+
                 continue
+
 
 
             df = calculate_indicators(df)
 
 
             ai_result = analyze_market(df)
+
+
+            print(
+                "SIGNAL:",
+                ai_result["signal"],
+                "CONF:",
+                ai_result["confidence"]
+            )
+
+
+            # فلتر الصفقة القوية
+
+            if not strong_trade_filter(ai_result):
+
+                print(
+                    "Weak signal ignored"
+                )
+
+                time.sleep(
+                    CHECK_INTERVAL
+                )
+
+                continue
+
+
+
+            # منع تكرار نفس الصفقة
+
+            if (
+                LAST_SIGNAL ==
+                ai_result["signal"]
+            ):
+
+                print(
+                    "Duplicate signal ignored"
+                )
+
+                time.sleep(
+                    CHECK_INTERVAL
+                )
+
+                continue
+
 
 
             last = df.iloc[-1]
@@ -135,6 +204,7 @@ def run_bot():
             )
 
 
+
             message = build_signal_message(
                 SYMBOL,
                 ai_result,
@@ -145,7 +215,17 @@ def run_bot():
             send_telegram(message)
 
 
+            LAST_SIGNAL = (
+                ai_result["signal"]
+            )
+
+            LAST_TIME = (
+                datetime.now()
+            )
+
+
             print(message)
+
 
 
         except Exception as e:
@@ -156,7 +236,10 @@ def run_bot():
             )
 
 
-        time.sleep(CHECK_INTERVAL)
+
+        time.sleep(
+            CHECK_INTERVAL
+        )
 
 
 
