@@ -147,8 +147,7 @@ confidence = ai_result["confidence"]
 reasons = ai_result["reasons"]
 price = ai_result["price"]
 
-
-
+atr = ai_result["atr"]
 message = f"""
 📊 *Forex AI Analyzer V2*
 
@@ -160,13 +159,15 @@ message = f"""
 
 💰 السعر: {price:.5f}
 
+📈 ATR: {atr:.5f}
+
 🧠 الأسباب:
 {chr(10).join(reasons)}
 
 📌 المؤشرات:
+
 RSI: {last['RSI']:.2f}
 EMA20: {last['EMA20']:.5f}
 EMA50: {last['EMA50']:.5f}
 MACD: {last['MACD']:.5f}
 """
-send_telegram(message)
